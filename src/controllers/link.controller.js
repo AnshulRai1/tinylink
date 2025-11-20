@@ -1,41 +1,60 @@
 import {nanoid} from 'nanoid'
 import { Link } from '../models/link.model.js'
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { ApiError } from '../utils/ApiError.js';
 
-const generateShortUrl =  async(req, res)=>{
+const generateShortUrl = asyncHandler(async(req, res)=>{
     const link = req.body.url;
     if(!link){
         throw new ApiError(400,"url is missing")
     }
-
-    let url;
+    let urlObj;
     try {
-        url = new URL(link)
+        urlObj = new URL(link)
     } catch (error) {
         throw new ApiError(400, "Please provide correct url")
     }
-    if(!(url.protocol==="http:" || url.protocol==="https:")){
-        throw new ApiError(400,"Provide a link with proper protocol")
+    if(!(urlObj.protocol==="http:" || urlObj.protocol==="https:")){
+        throw new ApiError(400,"Only Provide a link with proper protocol(https or http)")
     }
 
-    let code  = nanoid(8);
-    const codeExist = await Link.findOne({
-        code
-    })
+    urlObj.hostname = urlObj.hostname.toLowerCase()//converts the domain to lowercase
+    let normalizedUrl = urlObj.href.replace(/\/+$/,"");//removes the trailing slashes
+    const existingLink = await Link.findOne({url:normalizedUrl})
+    if(existingLink){
+        return res.status(200)
+        .json(
+            new ApiResponse(200, {
+                code:existingLink.code,
+                shortUrl:`${process.env.BASE_DOMAIN}/${existingLink.code}`,
+                originalUrl:existingLink.url
+            },
+            "Short link already exists"
+        )
+        )
+    }
 
-    if(codeExist){
+    let code = nanoid(8)
+    while(await Link.findOne({code})){
         code = nanoid(8)
     }
 
     const shortLinkCreated = await Link.create({
         code,
-        url:url.href
+        url:normalizedUrl
     })
     return res
-    .status(200)
+    .status(201)
     .json(
-        new ApiResponse(200, shortLinkCreated, "Short link successfully created")
+        new ApiResponse(201, {
+            code:shortLinkCreated.code,
+            shortUrl:`${process.env.BASE_DOMAIN}/${shortLinkCreated.code}`,
+            originalUrl:shortLinkCreated.url
+        },
+        "Short link successfully created"
     )
-}
+    )
+})
 
 export {generateShortUrl}

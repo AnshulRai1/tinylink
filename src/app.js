@@ -7,8 +7,12 @@ app.use(cors({
     credentials:true
 }))
 
+app.use(express.json());
+
 //importing routes
-import router from "./routes/route.js";
-app.use("/api/link",router)
+import healthCheckRouter from "./routes/healthCheck.routes.js"
+import linkRouter from "./routes/link.routes.js"
+app.use("/api",healthCheckRouter)
+app.use("/api",linkRouter)
 
 export {app}

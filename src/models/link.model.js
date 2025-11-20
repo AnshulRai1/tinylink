@@ -5,7 +5,6 @@ const linkSchema = new Schema(
         code:{
             type:String,
             required:true,
-            unique:true,
             minLength:6,
             maxLength:8,
             match: /^[A-Za-z0-9]+$/

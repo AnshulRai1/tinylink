@@ -1,16 +1,18 @@
 import {nanoid} from 'nanoid'
-import { Link } from '../models/link.model'
+import { Link } from '../models/link.model.js'
+import { ApiResponse } from '../utils/ApiResponse.js';
 
-const generateShortUrl = async(req, res)=>{
+const generateShortUrl =  async(req, res)=>{
     const link = req.body.url;
     if(!link){
         throw new ApiError(400,"url is missing")
     }
 
+    let url;
     try {
-        const url = new URL(link)
+        url = new URL(link)
     } catch (error) {
-        new ApiError(400, "Please provide correct url")
+        throw new ApiError(400, "Please provide correct url")
     }
     if(!(url.protocol==="http:" || url.protocol==="https:")){
         throw new ApiError(400,"Provide a link with proper protocol")
@@ -30,7 +32,10 @@ const generateShortUrl = async(req, res)=>{
         url:url.href
     })
     return res
-    .status(200);
+    .status(200)
+    .json(
+        new ApiResponse(200, shortLinkCreated, "Short link successfully created")
+    )
 }
 
 export {generateShortUrl}

@@ -99,8 +99,27 @@ const getOriginalUrl = asyncHandler(async (req, res)=>{
     
 
 })
+
+const deleteLink = asyncHandler(async(req, res)=>{
+    const {code} = req.params
+    if(!code){
+        new ApiError(400,"link is missing")
+    }
+
+    const deletestatus = await Link.deleteOne({code})
+    if(!deleteLink){
+        throw new ApiError(500, "Something went wrong while deleting link")
+    }
+
+    res.status(200)
+    .json(
+        new ApiResponse(200,"Link deleted successfully")
+    )
+
+})
 export { 
     generateShortUrl,
     getAllLinks,
-    getOriginalUrl
+    getOriginalUrl,
+    deleteLink
 } 

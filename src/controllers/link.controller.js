@@ -42,7 +42,8 @@ const generateShortUrl = asyncHandler(async(req, res)=>{
 
     const shortLinkCreated = await Link.create({
         code,
-        url:normalizedUrl
+        url:normalizedUrl,
+        createdAt: new Date()
     })
     return res
     .status(201)
@@ -57,4 +58,28 @@ const generateShortUrl = asyncHandler(async(req, res)=>{
     )
 })
 
-export {generateShortUrl}
+const getAllLinks = asyncHandler(async (req, res)=>{
+    const links = await Link.find({}).sort({createdAt:-1})
+    const formatted = links.map(link=>({
+        code: link.code,
+        shortUrl:`${process.env.BASE_DOMAIN}/${link.code}`,
+        clicks:link.clicks,
+        originalUrl:link.url,
+        lastClicked:link.lastClicked,
+        createdAt:link.createdAt
+    }))
+    console.log(formatted,"/n")
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,
+            formatted,
+            "All short links successfully fetched"
+        )
+    )
+})
+
+export { 
+    generateShortUrl,
+    getAllLinks
+} 

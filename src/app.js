@@ -14,5 +14,6 @@ import healthCheckRouter from "./routes/healthCheck.routes.js"
 import linkRouter from "./routes/link.routes.js"
 app.use("/api",healthCheckRouter)
 app.use("/api",linkRouter)
+app.use("/",linkRouter)
 
 export {app}

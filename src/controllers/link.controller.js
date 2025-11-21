@@ -79,7 +79,28 @@ const getAllLinks = asyncHandler(async (req, res)=>{
     )
 })
 
+const getOriginalUrl = asyncHandler(async (req, res)=>{
+    const {code} = req.params
+    console.log(code);
+    
+    if(!code){
+        throw new ApiError(404,"Short url does not exist")
+    }
+    const originalUrl = await Link.findOne({code})
+    if(!originalUrl){
+        throw new ApiError(404,"Short url does not exist")
+    }
+    await Link.updateOne(
+        {code},
+        {$inc:{clicks:1},$set:{lastClicked:new Date()}}
+    )
+    res.redirect(302, originalUrl.url)
+
+    
+
+})
 export { 
     generateShortUrl,
-    getAllLinks
+    getAllLinks,
+    getOriginalUrl
 } 

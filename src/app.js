@@ -11,9 +11,10 @@ app.use(express.json());
 
 //importing routes
 import healthCheckRouter from "./routes/healthCheck.routes.js"
-import linkRouter from "./routes/link.routes.js"
-app.use("/api",healthCheckRouter)
+import linkRouter from "./routes/api.routes.js"
+import redirectRouter from "./routes/redirect.routes.js"
+app.use("/",healthCheckRouter)
 app.use("/api",linkRouter)
-app.use("/",linkRouter)
+app.use("/",redirectRouter)
 
 export {app}

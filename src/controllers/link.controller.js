@@ -68,7 +68,7 @@ const getAllLinks = asyncHandler(async (req, res)=>{
         lastClicked:link.lastClicked,
         createdAt:link.createdAt
     }))
-    console.log(formatted,"/n")
+    // console.log(formatted,"/n")
     return res
     .status(200)
     .json(
@@ -84,7 +84,7 @@ const getOriginalUrl = asyncHandler(async (req, res)=>{
     console.log(code);
     
     if(!code){
-        throw new ApiError(404,"Short url does not exist")
+        throw new ApiError(400,"Short url does not exist")
     }
     const originalUrl = await Link.findOne({code})
     if(!originalUrl){
@@ -103,12 +103,12 @@ const getOriginalUrl = asyncHandler(async (req, res)=>{
 const deleteLink = asyncHandler(async(req, res)=>{
     const {code} = req.params
     if(!code){
-        new ApiError(400,"link is missing")
+        throw new ApiError(400,"link is missing")
     }
 
     const deletestatus = await Link.deleteOne({code})
-    if(!deleteLink){
-        throw new ApiError(500, "Something went wrong while deleting link")
+    if(deletestatus.deletedCount===0){
+        throw new ApiError(404, "Something went wrong while deleting link")
     }
 
     res.status(200)
@@ -117,9 +117,25 @@ const deleteLink = asyncHandler(async(req, res)=>{
     )
 
 })
+const getSingleLinkStats = asyncHandler(async(req, res)=>{
+    const {code} = req.params
+    if(!code){
+        throw new ApiError(400, "Code is missing")
+    }
+    const linkStats = await Link.findOne({code}).select("-_id -__v")
+    if(!linkStats){
+        throw new ApiError(404,"Not found link")
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, linkStats,"Stats for the code fetched successfully")
+    )
+})
 export { 
     generateShortUrl,
     getAllLinks,
     getOriginalUrl,
-    deleteLink
+    deleteLink,
+    getSingleLinkStats
 } 

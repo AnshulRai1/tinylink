@@ -68,7 +68,7 @@ const getAllLinks = asyncHandler(async (req, res)=>{
         lastClicked:link.lastClicked,
         createdAt:link.createdAt
     }))
-    // console.log(formatted,"/n")
+    console.log(formatted)
     return res
     .status(200)
     .json(
